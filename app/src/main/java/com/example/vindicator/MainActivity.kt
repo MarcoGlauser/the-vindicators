@@ -1,7 +1,6 @@
 package com.example.vindicator
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.hardware.Camera
 import android.os.Bundle
@@ -11,11 +10,11 @@ import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
 import android.util.Log
 import android.view.Window
 import android.view.WindowManager
+import android.widget.Button
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.karumi.dexter.Dexter
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import java.io.File
 import java.io.FileNotFoundException
@@ -31,6 +30,7 @@ class MainActivity : AppCompatActivity() {
     private var mPreview: CameraPreview? = null
 
     private val TAG = "Vindicator"
+
     private val pictureCallback = Camera.PictureCallback { data, _ ->
 
         val pictureFile: File = getOutputMediaFile(MEDIA_TYPE_IMAGE) ?: run {
@@ -47,10 +47,7 @@ class MainActivity : AppCompatActivity() {
         } catch (e: IOException) {
             Log.d(TAG, "Error accessing file: ${e.message}")
         }
-    }
-
-    private fun checkCameraHardware(context: Context): Boolean {
-        return context.packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA)
+        mCamera?.startPreview()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,12 +60,20 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.main_activity)
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+            != PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            )
             != PackageManager.PERMISSION_GRANTED
         ) {
 
             ActivityCompat.requestPermissions(
                 this,
-                arrayOf(Manifest.permission.CAMERA),
+                arrayOf(
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                ),
                 4343
             )
         }
@@ -88,51 +93,13 @@ class MainActivity : AppCompatActivity() {
             val preview: FrameLayout = findViewById(R.id.camera_preview)
             preview.addView(it)
         }
-    }
+        val captureButton: Button = findViewById(R.id.button_capture)
 
-    fun getOptimalSize(sizes: List<Camera.Size>, w: Int, h: Int): Camera.Size {
-        val ASPECT_TOLERANCE = 0.05
-        val targetRatio = w as Double / h
+        captureButton.setOnClickListener {
+            // get an image from the camera
+            mCamera?.takePicture(null, null, pictureCallback)
 
-        var optimalSize: Camera.Size? = null
-
-        var minDiff = java.lang.Double.MAX_VALUE
-
-        val targetHeight = h
-
-        // Find size
-        for (size in sizes) {
-            val ratio = size.width.toDouble() / size.height
-            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue
-            if (Math.abs(size.height - targetHeight) < minDiff) {
-                optimalSize = size
-                minDiff = Math.abs(size.height - targetHeight).toDouble()
-            }
         }
-
-        if (optimalSize == null) {
-            minDiff = java.lang.Double.MAX_VALUE
-            for (size in sizes) {
-                if (Math.abs(size.height - targetHeight) < minDiff) {
-                    optimalSize = size
-                    minDiff = Math.abs(size.height - targetHeight).toDouble()
-                }
-            }
-        }
-        return optimalSize!!
-    }
-
-
-    /**
-     * Requesting permissions storage, audio and camera at once
-     */
-    fun requestPermission() {
-        Dexter.withActivity(this.parent).withPermissions(
-            Manifest.permission.CAMERA,
-            Manifest.permission.RECORD_AUDIO,
-            Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE
-        ).withListener(dialogMultiplePermissionsListener).check()
     }
 
 
