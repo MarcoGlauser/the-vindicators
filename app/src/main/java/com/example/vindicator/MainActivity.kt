@@ -39,21 +39,27 @@ class MainActivity : AppCompatActivity() {
             val informationForImage = ImageToWebService.instance.getInformationForImage(data)
 
             ProduceDataProvider().loadProduce(informationForImage).addOnSuccessListener {
+                val produceContainerView = findViewById<GridLayout>(R.id.produce_container)
+                produceContainerView.visibility = View.GONE
+                val badgeSeasonal = findViewById<TextView>(R.id.badge_seasonal)
+                badgeSeasonal.visibility = View.GONE
+
                 if (it != null) {
                     val produce: Produce? = it.toObject(Produce::class.java)
                     if (produce != null) {
-                        val produceContainerView = findViewById<GridLayout>(R.id.produce_container)
-                        produceContainerView.visibility = View.VISIBLE;
+                        produceContainerView.visibility = View.VISIBLE
                         produceContainerView.setBackgroundColor(getProduceBackgroundColor(produce))
 
                         val produceNameView = findViewById<TextView>(R.id.produce_name)
                         produceNameView.text = produce.name_de
 
-//                        val produceOriginView = findViewById<TextView>(R.id.badge_produce_origin)
-//                        produceOriginView.text = produce.transport_mode
+                        if (produce.in_season) {
+                            badgeSeasonal.visibility = View.VISIBLE
+                        }
+
+
                         val iconOriginView = findViewById<TextView>(R.id.icon_origin)
                         iconOriginView.text = getProduceTransportIcon(produce)
-
                     }
                 } else {
                     throw java.lang.RuntimeException("could no deserialize produce ${it?.data}")
@@ -74,7 +80,7 @@ class MainActivity : AppCompatActivity() {
         return when {
             isInSeasonOrLocal -> Color.parseColor("#43a047")
             isNotInSeasonOrEuropean -> Color.parseColor("#ffa000")
-            else -> Color.parseColor("#ff0000")
+            else -> Color.parseColor("#d73a49")
         }
     }
 
