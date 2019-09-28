@@ -6,13 +6,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class ProduceDataProvider {
 
-    public fun loadProduce(produceName: String): Task<DocumentSnapshot> {
+    fun loadProduce(produceName: String): Task<DocumentSnapshot> {
         val db = FirebaseFirestore.getInstance()
         val produces = db.collection("produce")
-        val ref = produces.document("Apple")
+        val ref = produces.document(produceName)
 
         return ref.get()
-
-
     }
 }
