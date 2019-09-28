@@ -15,7 +15,6 @@ import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -25,12 +24,10 @@ import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
-    private var dialogMultiplePermissionsListener: MultiplePermissionsListener? = null
+
     private var mCamera: Camera? = null
     private var mPreview: CameraPreview? = null
-
     private val TAG = "Vindicator"
-
     private val pictureCallback = Camera.PictureCallback { data, _ ->
 
         val pictureFile: File = getOutputMediaFile(MEDIA_TYPE_IMAGE) ?: run {
@@ -53,7 +50,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
-        getWindow().setFlags(
+        window.setFlags(
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
