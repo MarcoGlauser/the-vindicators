@@ -71,6 +71,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun getProduceTransportIcon(produce: Produce): Int {
+        return when {
+            produce.transport_mode.equals("plane") -> R.string.fa_plane_solid
+            produce.transport_mode.equals("ship") -> R.string.fa_ship_solid
+            produce.transport_mode.equals("truck") -> R.string.fa_truck_solid
+            else -> R.string.fa_tractor_solid
+        }
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
