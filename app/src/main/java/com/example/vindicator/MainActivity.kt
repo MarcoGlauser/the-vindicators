@@ -2,6 +2,7 @@ package com.example.vindicator
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import android.hardware.Camera
 import android.os.Bundle
 import android.os.Environment
@@ -12,6 +13,7 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.GridLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -50,6 +52,8 @@ class MainActivity : AppCompatActivity() {
                     if (produce != null) {
                         val produceNameView = findViewById<TextView>(R.id.produce_name)
                         produceNameView.text = produce.name_de
+                        val produceContainerView = findViewById<GridLayout>(R.id.produce_container)
+                        produceContainerView.background = getProduceBackgroundColor(produce)
                     }
                 } else {
                     throw java.lang.RuntimeException("could no deserialize produce ${it?.data}")
@@ -61,6 +65,10 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Error accessing file: ${e.message}")
         }
         mCamera?.startPreview()
+    }
+
+    private fun getProduceBackgroundColor(produce: Produce): Drawable? {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
