@@ -1,9 +1,9 @@
 from google.cloud import firestore
 
+
+google_cloud_project = 'the-vindicators'
 collection_name = 'produce'
 
-# Add a new document
-google_cloud_project = 'the-vindicators'
 db = firestore.Client(google_cloud_project)
 collection = db.collection(collection_name)
 

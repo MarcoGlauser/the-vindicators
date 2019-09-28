@@ -37,6 +37,7 @@ in_season_in_september = [
     'cabbage',
     'zucchetti',
     'onion',
+    'potato'
 ]
 
 

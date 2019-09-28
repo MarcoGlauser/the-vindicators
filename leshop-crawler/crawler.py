@@ -14,12 +14,7 @@ def main():
             continent = wolfram.query_continent(origin)
             transport_mode = transport.get_transport_mode(product_en, origin, continent)
             in_season = seasonality.is_in_season(product_en)
-            print(product_de)
-            print(origin)
-            print(distance)
-            print(continent)
-            print(transport_mode)
-            print(in_season)
+
             firestore.save_product(product_en,
                                    name_de=product_de,
                                    name_en=product_en,
@@ -29,6 +24,7 @@ def main():
                                    transport_mode=transport_mode,
                                    in_season=in_season
                                    )
+            print(f'SUCCESS: {product_de}')
         except:
             print(f'SKIPPED: product {product_de} failed to crawl')
         print('')
