@@ -8,4 +8,5 @@ class Produce {
     var distance: Float = 0.toFloat()
     var transport_mode: String? = null
     var in_season: Boolean = false
+    var co2_emissions_per_kg: Int = 0
 }
