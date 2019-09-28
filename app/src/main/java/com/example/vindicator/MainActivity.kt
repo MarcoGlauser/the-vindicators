@@ -61,6 +61,10 @@ class MainActivity : AppCompatActivity() {
 
                         val iconOriginView = findViewById<TextView>(R.id.icon_origin)
                         iconOriginView.text = getProduceTransportIcon(produce)
+
+                        val textViewKm = findViewById<TextView>(R.id.textview_km)
+                        textViewKm.text =
+                            (produce.co2_emissions_per_kg / 400).toString() + " km per kg"
                     }
                 } else {
                     throw java.lang.RuntimeException("could no deserialize produce ${it?.data}")

@@ -46,12 +46,12 @@
                 android:textSize="36sp" />
 
             <LinearLayout
-                android:layout_width="300dp"
-                android:layout_height="50dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_row="1"
                 android:layout_column="0"
+                android:layout_gravity="bottom|center_vertical"
                 android:layout_marginLeft="15dp"
-                android:layout_marginBottom="15dp"
                 android:orientation="horizontal">
 
                 <info.androidhive.fontawesome.FontTextView
@@ -68,6 +68,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
+                    android:layout_marginBottom="5dp"
                     android:text="15 km/kg"
                     android:textColor="#FFFFFF"
                     android:textSize="30sp" />
@@ -95,7 +96,7 @@
                 android:layout_column="1"
                 android:layout_gravity="end|bottom"
                 android:layout_marginRight="5dp"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="5dp"
                 android:background="#0D0DAF"
                 android:text="Seasonal"
                 android:textFontWeight="1000"
