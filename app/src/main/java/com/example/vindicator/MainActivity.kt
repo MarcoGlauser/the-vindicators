@@ -21,6 +21,10 @@ import com.example.vindicator.services.ProduceDataProvider
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.*
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
+import java.io.ByteArrayOutputStream
 
 
 class MainActivity : AppCompatActivity() {
@@ -32,7 +36,15 @@ class MainActivity : AppCompatActivity() {
     private val pictureCallback = Camera.PictureCallback { data, _ ->
         try {
             mCamera?.startPreview()
-            ImageToWebService.instance.getInformationForImage(data) {
+
+
+            val photo = scaleImage(data,0.5)
+            val bytes = ByteArrayOutputStream()
+            photo.compress(Bitmap.CompressFormat.JPEG, 60, bytes)
+            val compressedBytes = bytes.toByteArray()
+            Log.d(TAG, data.size.toString())
+            Log.d(TAG, compressedBytes.size.toString())
+            ImageToWebService.instance.getInformationForImage(compressedBytes) {
 
                 ProduceDataProvider().loadProduce(it).addOnSuccessListener {
                     val (produceContainerView, badgeSeasonal) = resetView()
@@ -73,6 +85,20 @@ class MainActivity : AppCompatActivity() {
         } catch (e: IOException) {
             Log.d(TAG, "Error accessing file: ${e.message}")
         }
+    }
+
+    private fun scaleImage(data: ByteArray, scalingFactor: Double): Bitmap{
+        val src: Bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
+        val m = Matrix()
+        val width = src.width
+        val height = src.height
+        Log.d(TAG, "$width $height")
+        m.setScale(scalingFactor.toFloat(), scalingFactor.toFloat())
+        val resizedBitmap = Bitmap.createBitmap(src, 0, 0, width, height, m, false)
+        val resizedWidth = resizedBitmap.width
+        val resizedHeight = resizedBitmap.height
+        Log.d(TAG, "$resizedWidth $resizedHeight")
+        return resizedBitmap
     }
 
     private fun resetView(): Pair<GridLayout, TextView> {
