@@ -36,6 +36,8 @@ class MainActivity : AppCompatActivity() {
     private val TAG = "Vindicator"
     private val pictureCallback = Camera.PictureCallback { data, _ ->
         try {
+            mCamera?.startPreview()
+
             val informationForImage = ImageToWebService.instance.getInformationForImage(data)
 
             ProduceDataProvider().loadProduce(informationForImage).addOnSuccessListener {
@@ -57,7 +59,6 @@ class MainActivity : AppCompatActivity() {
                             badgeSeasonal.visibility = View.VISIBLE
                         }
 
-
                         val iconOriginView = findViewById<TextView>(R.id.icon_origin)
                         iconOriginView.text = getProduceTransportIcon(produce)
                     }
@@ -70,7 +71,6 @@ class MainActivity : AppCompatActivity() {
         } catch (e: IOException) {
             Log.d(TAG, "Error accessing file: ${e.message}")
         }
-        mCamera?.startPreview()
     }
 
     private fun getProduceBackgroundColor(produce: Produce): Int {

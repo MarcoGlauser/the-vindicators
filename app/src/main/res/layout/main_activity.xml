@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical">
 
     <FrameLayout
@@ -28,9 +28,9 @@
             android:columnCount="2"
             android:elevation="5dp"
             android:rowCount="2"
-            tools:visibility="visible"
             android:stretchColumns="0,1"
-            android:visibility="gone">
+            android:visibility="gone"
+            tools:visibility="visible">
 
             <TextView
                 android:id="@+id/produce_name"
@@ -40,15 +40,45 @@
                 android:layout_rowSpan="1"
                 android:layout_column="0"
                 android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="7dp"
                 android:text="Apple"
                 android:textColor="#FFFFFF"
                 android:textSize="36sp" />
+
+            <LinearLayout
+                android:layout_width="300dp"
+                android:layout_height="50dp"
+                android:layout_row="1"
+                android:layout_column="0"
+                android:layout_marginLeft="15dp"
+                android:layout_marginBottom="15dp"
+                android:orientation="horizontal">
+
+                <info.androidhive.fontawesome.FontTextView
+                    android:id="@+id/icon_car"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fa_car_solid"
+                    android:textColor="#FFFFFF"
+                    android:textSize="30sp"
+                    app:solid_icon="true" />
+
+                <TextView
+                    android:id="@+id/textview_km"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="15 km/kg"
+                    android:textColor="#FFFFFF"
+                    android:textSize="30sp" />
+            </LinearLayout>
 
             <info.androidhive.fontawesome.FontTextView
                 android:id="@+id/icon_origin"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_row="0"
+                android:layout_column="1"
                 android:layout_gravity="right|top"
                 android:layout_marginTop="15dp"
                 android:layout_marginRight="15dp"
@@ -65,7 +95,7 @@
                 android:layout_column="1"
                 android:layout_gravity="end|bottom"
                 android:layout_marginRight="5dp"
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="24dp"
                 android:background="#0D0DAF"
                 android:text="Seasonal"
                 android:textFontWeight="1000"
