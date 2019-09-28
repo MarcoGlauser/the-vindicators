@@ -25,42 +25,47 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var mtimer: Timer
     private var mCamera: Camera? = null
     private var mPreview: CameraPreview? = null
     private val TAG = "Vindicator"
     private val pictureCallback = Camera.PictureCallback { data, _ ->
         try {
             mCamera?.startPreview()
-            val informationForImage = ImageToWebService.instance.getInformationForImage(data)
+            ImageToWebService.instance.getInformationForImage(data) {
 
-            ProduceDataProvider().loadProduce(informationForImage).addOnSuccessListener {
-                val produceContainerView = findViewById<GridLayout>(R.id.produce_container)
-                produceContainerView.visibility = View.GONE
-                val badgeSeasonal = findViewById<TextView>(R.id.badge_seasonal)
-                badgeSeasonal.visibility = View.GONE
+                ProduceDataProvider().loadProduce(it).addOnSuccessListener {
+                    val (produceContainerView, badgeSeasonal) = resetView()
 
-                if (it != null) {
-                    val produce: Produce? = it.toObject(Produce::class.java)
-                    if (produce != null) {
-                        produceContainerView.visibility = View.VISIBLE
-                        produceContainerView.setBackgroundColor(getProduceBackgroundColor(produce))
+                    if (it != null) {
+                        val produce: Produce? = it.toObject(Produce::class.java)
+                        if (produce != null) {
+                            mtimer.cancel()
+                            mtimer = Timer()
+                            produceContainerView.visibility = View.VISIBLE
+                            produceContainerView.setBackgroundColor(
+                                getProduceBackgroundColor(
+                                    produce
+                                )
+                            )
 
-                        val produceNameView = findViewById<TextView>(R.id.produce_name)
-                        produceNameView.text = produce.name_de
+                            val produceNameView = findViewById<TextView>(R.id.produce_name)
+                            produceNameView.text = produce.name_de
 
-                        if (produce.in_season) {
-                            badgeSeasonal.visibility = View.VISIBLE
+                            if (produce.in_season) {
+                                badgeSeasonal.visibility = View.VISIBLE
+                            }
+
+                            val iconOriginView = findViewById<TextView>(R.id.icon_origin)
+                            iconOriginView.text = getProduceTransportIcon(produce)
+
+                            val textViewKm = findViewById<TextView>(R.id.textview_km)
+                            textViewKm.text =
+                                (produce.co2_emissions_per_kg / 400).toString() + " km per kg"
                         }
-
-                        val iconOriginView = findViewById<TextView>(R.id.icon_origin)
-                        iconOriginView.text = getProduceTransportIcon(produce)
-
-                        val textViewKm = findViewById<TextView>(R.id.textview_km)
-                        textViewKm.text =
-                            (produce.co2_emissions_per_kg / 400).toString() + " km per kg"
+                    } else {
+                        throw java.lang.RuntimeException("could no deserialize produce ${it?.data}")
                     }
-                } else {
-                    throw java.lang.RuntimeException("could no deserialize produce ${it?.data}")
                 }
             }
         } catch (e: FileNotFoundException) {
@@ -69,6 +74,15 @@ class MainActivity : AppCompatActivity() {
             Log.d(TAG, "Error accessing file: ${e.message}")
         }
     }
+
+    private fun resetView(): Pair<GridLayout, TextView> {
+        val produceContainerView = findViewById<GridLayout>(R.id.produce_container)
+        produceContainerView.visibility = View.GONE
+        val badgeSeasonal = findViewById<TextView>(R.id.badge_seasonal)
+        badgeSeasonal.visibility = View.GONE
+        return Pair(produceContainerView, badgeSeasonal)
+    }
+
 
     private fun getProduceBackgroundColor(produce: Produce): Int {
         val isInSeasonOrLocal: Boolean = produce.in_season || produce.country.equals("Schweiz")
@@ -136,15 +150,26 @@ class MainActivity : AppCompatActivity() {
             preview.addView(it)
         }
 
-        Timer().scheduleAtFixedRate(object : TimerTask() {
+        mtimer = Timer()
+        takePicturesInIntervalAndSearchProduce()
+
+        val produceContainerView = findViewById<GridLayout>(R.id.produce_container)
+        produceContainerView.setOnClickListener {
+            takePicturesInIntervalAndSearchProduce()
+            resetView()
+        }
+    }
+
+    private fun takePicturesInIntervalAndSearchProduce() {
+        mtimer.scheduleAtFixedRate(object : TimerTask() {
             override fun run() {
-                runOnUiThread(java.lang.Runnable {
+                runOnUiThread(Runnable {
                     mCamera?.takePicture(null, null, pictureCallback)
 
                 })
 
             }
-        }, 3000, 5000)
+        }, 100, 2000)
     }
 
 

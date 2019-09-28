@@ -18,6 +18,7 @@
             android:layout_height="107dp"
             android:layout_gravity="bottom"
             android:background="#319614"
+            android:clickable="true"
             android:columnCount="2"
             android:elevation="5dp"
             android:rowCount="2"
