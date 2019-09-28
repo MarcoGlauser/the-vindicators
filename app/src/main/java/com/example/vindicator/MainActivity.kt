@@ -5,14 +5,10 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.hardware.Camera
 import android.os.Bundle
-import android.os.Environment
-import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
-import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
 import android.util.Log
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
-import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.GridLayout
 import android.widget.TextView
@@ -22,10 +18,8 @@ import androidx.core.content.ContextCompat
 import com.example.vindicator.services.ImageToWebService
 import com.example.vindicator.services.Produce
 import com.example.vindicator.services.ProduceDataProvider
-import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.text.SimpleDateFormat
 import java.util.*
 
 
@@ -37,7 +31,6 @@ class MainActivity : AppCompatActivity() {
     private val pictureCallback = Camera.PictureCallback { data, _ ->
         try {
             mCamera?.startPreview()
-
             val informationForImage = ImageToWebService.instance.getInformationForImage(data)
 
             ProduceDataProvider().loadProduce(informationForImage).addOnSuccessListener {
@@ -142,13 +135,16 @@ class MainActivity : AppCompatActivity() {
             val preview: FrameLayout = findViewById(R.id.camera_preview)
             preview.addView(it)
         }
-        val captureButton: Button = findViewById(R.id.button_capture)
 
-        captureButton.setOnClickListener {
-            // get an image from the camera
-            mCamera?.takePicture(null, null, pictureCallback)
+        Timer().scheduleAtFixedRate(object : TimerTask() {
+            override fun run() {
+                runOnUiThread(java.lang.Runnable {
+                    mCamera?.takePicture(null, null, pictureCallback)
 
-        }
+                })
+
+            }
+        }, 3000, 5000)
     }
 
 
@@ -161,37 +157,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getOutputMediaFile(type: Int): File? {
-        // To be safe, you should check that the SDCard is mounted
-        // using Environment.getExternalStorageState() before doing this.
-
-        val mediaStorageDir = File(
-            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-            "MyCameraApp"
-        )
-        // This location works best if you want the created images to be shared
-        // between applications and persist after your app has been uninstalled.
-
-        // Create the storage directory if it does not exist
-        mediaStorageDir.apply {
-            if (!exists()) {
-                if (!mkdirs()) {
-                    Log.d("MyCameraApp", "failed to create directory")
-                    return null
-                }
-            }
-        }
-
-        // Create a media file name
-        val timeStamp = SimpleDateFormat("yyyyM-Mdd_HHmmss").format(Date())
-        return when (type) {
-            MEDIA_TYPE_IMAGE -> {
-                File("${mediaStorageDir.path}${File.separator}IMG_$timeStamp.jpg")
-            }
-            MEDIA_TYPE_VIDEO -> {
-                File("${mediaStorageDir.path}${File.separator}VID_$timeStamp.mp4")
-            }
-            else -> null
-        }
-    }
 }
