@@ -18,11 +18,11 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.vindicator.services.ImageToWebService
 import com.example.vindicator.services.Produce
 import com.example.vindicator.services.ProduceDataProvider
 import java.io.File
 import java.io.FileNotFoundException
-import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
@@ -34,19 +34,10 @@ class MainActivity : AppCompatActivity() {
     private var mPreview: CameraPreview? = null
     private val TAG = "Vindicator"
     private val pictureCallback = Camera.PictureCallback { data, _ ->
-
-        val pictureFile: File = getOutputMediaFile(MEDIA_TYPE_IMAGE) ?: run {
-            Log.d(TAG, ("Error creating media file, check storage permissions"))
-            return@PictureCallback
-        }
-
         try {
-            val fos = FileOutputStream(pictureFile)
-            fos.write(data)
-            fos.close()
-            // analyze picture and get name of produce
-            // load data for this produce
-            ProduceDataProvider().loadProduce("Banana").addOnSuccessListener {
+            val informationForImage = ImageToWebService.instance.getInformationForImage(data)
+
+            ProduceDataProvider().loadProduce(informationForImage).addOnSuccessListener {
                 if (it != null) {
                     val produce: Produce? = it.toObject(Produce::class.java)
                     if (produce != null) {
@@ -54,6 +45,8 @@ class MainActivity : AppCompatActivity() {
                         produceNameView.text = produce.name_de
                         val produceContainerView = findViewById<GridLayout>(R.id.produce_container)
                         produceContainerView.setBackgroundColor(getProduceBackgroundColor(produce))
+                        val produceOriginView = findViewById<TextView>(R.id.badge_produce_origin)
+                        produceOriginView.text = produce.transport_mode
                     }
                 } else {
                     throw java.lang.RuntimeException("could no deserialize produce ${it?.data}")
@@ -68,11 +61,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getProduceBackgroundColor(produce: Produce): Int {
-        val is_in_season_or_local: Boolean = produce.in_season || produce.country.equals("Schweiz")
-        val is_not_in_season_or_european: Boolean = !produce.in_season && produce.continent.equals("Europe")
+        val isInSeasonOrLocal: Boolean = produce.in_season || produce.country.equals("Schweiz")
+        val isNotInSeasonOrEuropean: Boolean =
+            !produce.in_season && produce.continent.equals("Europe")
         return when {
-            is_in_season_or_local -> Color.parseColor("#43a047")
-            is_not_in_season_or_european -> Color.parseColor("#ffa000")
+            isInSeasonOrLocal -> Color.parseColor("#43a047")
+            isNotInSeasonOrEuropean -> Color.parseColor("#ffa000")
             else -> Color.parseColor("#ff0000")
         }
     }

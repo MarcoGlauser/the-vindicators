@@ -2,18 +2,19 @@ package com.example.vindicator.services
 
 import android.content.ContentValues.TAG
 import android.util.Log
-import com.jayway.jsonpath.JsonPath
-import ch.viascom.groundwork.foxhttp.exception.FoxHttpException
-import ch.viascom.groundwork.foxhttp.body.request.RequestObjectBody
-import ch.viascom.groundwork.foxhttp.header.HeaderEntry
-import ch.viascom.groundwork.foxhttp.type.RequestType
-import ch.viascom.groundwork.foxhttp.builder.FoxHttpRequestBuilder
-import ch.viascom.groundwork.foxhttp.FoxHttpResponse
-import ch.viascom.groundwork.foxhttp.interceptor.response.HttpErrorResponseInterceptor
-import ch.viascom.groundwork.foxhttp.interceptor.FoxHttpInterceptorType
-import ch.viascom.groundwork.foxhttp.parser.GsonParser
-import ch.viascom.groundwork.foxhttp.builder.FoxHttpClientBuilder
 import ch.viascom.groundwork.foxhttp.FoxHttpClient
+import ch.viascom.groundwork.foxhttp.FoxHttpResponse
+import ch.viascom.groundwork.foxhttp.authorization.BearerTokenAuthorization
+import ch.viascom.groundwork.foxhttp.authorization.FoxHttpAuthorizationScope
+import ch.viascom.groundwork.foxhttp.body.request.RequestObjectBody
+import ch.viascom.groundwork.foxhttp.builder.FoxHttpClientBuilder
+import ch.viascom.groundwork.foxhttp.builder.FoxHttpRequestBuilder
+import ch.viascom.groundwork.foxhttp.exception.FoxHttpException
+import ch.viascom.groundwork.foxhttp.interceptor.FoxHttpInterceptorType
+import ch.viascom.groundwork.foxhttp.interceptor.response.HttpErrorResponseInterceptor
+import ch.viascom.groundwork.foxhttp.parser.GsonParser
+import ch.viascom.groundwork.foxhttp.type.RequestType
+import com.jayway.jsonpath.JsonPath
 import java.io.IOException
 import java.util.*
 
@@ -40,14 +41,12 @@ class ImageToWebService {
         val token = "afa383c72087a4aea96567d1cb48ddfdcfef1679"
         var response: FoxHttpResponse? = null
         try {
-            response = FoxHttpRequestBuilder(url, RequestType.POST, foxHttpClient).addRequestHeader(
-                HeaderEntry(
-                    "Authorization",
-                    "Bearer $token"
+            response =
+                FoxHttpRequestBuilder(url, RequestType.POST, foxHttpClient).addFoxHttpAuthorization(
+                    FoxHttpAuthorizationScope.ANY, BearerTokenAuthorization(token)
                 )
-            )
-                .setRequestBody(RequestObjectBody(ImageRequest(encodeToBase64(byteImage))))
-                .buildAndExecute()
+                    .setRequestBody(RequestObjectBody(ImageRequest(encodeToBase64(byteImage))))
+                    .buildAndExecute()
         } catch (e: FoxHttpException) {
             e.printStackTrace()
         }
@@ -55,12 +54,16 @@ class ImageToWebService {
         // Deserialization response
         var rawJson: String? = null
         try {
-            rawJson = response!!.stringBody
+            if (response != null) {
+                rawJson = response.stringBody
+            } else {
+                return "bla"
+            }
         } catch (e: IOException) {
             e.printStackTrace()
         }
 
-        Log.d(TAG,rawJson)
+        Log.d(TAG, rawJson)
         val name = JsonPath.read<String>(rawJson, "$.items[0].item.name")
         Log.d(TAG, name)
 
