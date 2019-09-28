@@ -16,7 +16,8 @@ def query_distance(origin):
 
 def clean_distance(distance):
     m = re.search('\d+', distance)
-    return m.group()
+    distance = m.group()
+    return int(distance)
 
 
 def query_continent(origin):

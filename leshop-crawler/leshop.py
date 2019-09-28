@@ -17,6 +17,11 @@ headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Ubuntu Hack Zurich; Linux x86_64; rv:69.0) Gecko/20100101 Firefox/69.0'
 }
 
+origin_overrides = {
+    'Chilien': 'Chile',
+    'Zentralamerika': 'Costa Rica',
+}
+
 
 def get_origin(product):
     product_id = get_first_product_id(product)
@@ -28,8 +33,11 @@ def get_origin(product):
 
 
 def clean_origin(origin):
-    m = re.search('[A-Za-zäöü]+', origin)
-    return m.group()
+    m = re.search('[A-Za-zÄÖÜäöü]+', origin)
+    clean_origin = m.group()
+    if clean_origin in origin_overrides.keys():
+        return origin_overrides[clean_origin]
+    return clean_origin
 
 
 def get_product_origin(product_id):
