@@ -12,9 +12,12 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.example.vindicator.services.Produce
+import com.example.vindicator.services.ProduceDataProvider
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
@@ -39,6 +42,19 @@ class MainActivity : AppCompatActivity() {
             val fos = FileOutputStream(pictureFile)
             fos.write(data)
             fos.close()
+            // analyze picture and get name of produce
+            // load data for this produce
+            ProduceDataProvider().loadProduce("Banana").addOnSuccessListener {
+                if (it != null) {
+                    val produce: Produce? = it.toObject(Produce::class.java)
+                    if (produce != null) {
+                        val produceNameView = findViewById<TextView>(R.id.produce_name)
+                        produceNameView.text = produce.name_de
+                    }
+                } else {
+                    throw java.lang.RuntimeException("could no deserialize produce ${it?.data}")
+                }
+            }
         } catch (e: FileNotFoundException) {
             Log.d(TAG, "File not found: ${e.message}")
         } catch (e: IOException) {
