@@ -2,6 +2,7 @@ package com.example.vindicator
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.hardware.Camera
 import android.os.Bundle
 import android.os.Environment
@@ -67,7 +68,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getProduceBackgroundColor(produce: Produce): Int {
-        return R.color.colorAccent
+        val is_in_season_or_local: Boolean = produce.in_season || produce.country.equals("Schweiz")
+        val is_not_in_season_or_european: Boolean = !produce.in_season && produce.continent.equals("Europe")
+        return when {
+            is_in_season_or_local -> Color.parseColor("#43a047")
+            is_not_in_season_or_european -> Color.parseColor("#ffa000")
+            else -> Color.parseColor("#ff0000")
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
