@@ -9,6 +9,7 @@ import android.os.Environment
 import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
 import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
 import android.util.Log
+import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.Button
@@ -41,12 +42,18 @@ class MainActivity : AppCompatActivity() {
                 if (it != null) {
                     val produce: Produce? = it.toObject(Produce::class.java)
                     if (produce != null) {
+                        val produceContainerView = findViewById<GridLayout>(R.id.produce_container)
+                        produceContainerView.visibility = View.VISIBLE;
+                        produceContainerView.setBackgroundColor(getProduceBackgroundColor(produce))
+
                         val produceNameView = findViewById<TextView>(R.id.produce_name)
                         produceNameView.text = produce.name_de
-                        val produceContainerView = findViewById<GridLayout>(R.id.produce_container)
-                        produceContainerView.setBackgroundColor(getProduceBackgroundColor(produce))
-                        val produceOriginView = findViewById<TextView>(R.id.badge_produce_origin)
-                        produceOriginView.text = produce.transport_mode
+
+//                        val produceOriginView = findViewById<TextView>(R.id.badge_produce_origin)
+//                        produceOriginView.text = produce.transport_mode
+                        val iconOriginView = findViewById<TextView>(R.id.icon_origin)
+                        iconOriginView.text = getProduceTransportIcon(produce)
+
                     }
                 } else {
                     throw java.lang.RuntimeException("could no deserialize produce ${it?.data}")
@@ -71,14 +78,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getProduceTransportIcon(produce: Produce): Int {
-        return when {
+    private fun getProduceTransportIcon(produce: Produce): String {
+        val bla = when {
             produce.transport_mode.equals("plane") -> R.string.fa_plane_solid
             produce.transport_mode.equals("ship") -> R.string.fa_ship_solid
             produce.transport_mode.equals("truck") -> R.string.fa_truck_solid
             else -> R.string.fa_tractor_solid
         }
 
+        return resources.getString(bla)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
