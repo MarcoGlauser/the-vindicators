@@ -2,7 +2,10 @@ package com.example.vindicator
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.Matrix
 import android.hardware.Camera
 import android.os.Bundle
 import android.util.Log
@@ -11,6 +14,7 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.GridLayout
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -18,13 +22,10 @@ import androidx.core.content.ContextCompat
 import com.example.vindicator.services.ImageToWebService
 import com.example.vindicator.services.Produce
 import com.example.vindicator.services.ProduceDataProvider
+import java.io.ByteArrayOutputStream
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.util.*
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import java.io.ByteArrayOutputStream
 
 
 class MainActivity : AppCompatActivity() {
@@ -37,8 +38,7 @@ class MainActivity : AppCompatActivity() {
         try {
             mCamera?.startPreview()
 
-
-            val photo = scaleImage(data,0.5)
+            val photo = scaleImage(data, 0.25)
             val bytes = ByteArrayOutputStream()
             photo.compress(Bitmap.CompressFormat.JPEG, 60, bytes)
             val compressedBytes = bytes.toByteArray()
@@ -47,11 +47,11 @@ class MainActivity : AppCompatActivity() {
             ImageToWebService.instance.getInformationForImage(compressedBytes) {
 
                 ProduceDataProvider().loadProduce(it).addOnSuccessListener {
-                    val (produceContainerView, badgeSeasonal) = resetView()
-
                     if (it != null) {
+
                         val produce: Produce? = it.toObject(Produce::class.java)
                         if (produce != null) {
+                            val (produceContainerView, badgeSeasonal) = resetView()
                             mtimer.cancel()
                             mtimer = Timer()
                             produceContainerView.visibility = View.VISIBLE
@@ -68,12 +68,21 @@ class MainActivity : AppCompatActivity() {
                                 badgeSeasonal.visibility = View.VISIBLE
                             }
 
-                            val iconOriginView = findViewById<TextView>(R.id.icon_origin)
-                            iconOriginView.text = getProduceTransportIcon(produce)
+//                            val iconOriginView = findViewById<TextView>(R.id.icon_origin)
+//                            iconOriginView.text = getProduceTransportIcon(produce)
 
                             val textViewKm = findViewById<TextView>(R.id.textview_km)
-                            textViewKm.text =
-                                (produce.co2_emissions_per_kg / 400).toString() + " km per kg"
+                            textViewKm.text = "${(produce.co2_emissions_per_kg / 400)} km per kg"
+
+                            val tree = findViewById<ImageView>(R.id.tree)
+                            val isInSeasonAndLocal: Boolean =
+                                produce.in_season && produce.country.equals("Schweiz")
+                            if (isInSeasonAndLocal) {
+                                tree.visibility = View.VISIBLE
+                            } else {
+                                tree.visibility = View.GONE
+                            }
+
                         }
                     } else {
                         throw java.lang.RuntimeException("could no deserialize produce ${it?.data}")
@@ -87,7 +96,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun scaleImage(data: ByteArray, scalingFactor: Double): Bitmap{
+    private fun scaleImage(data: ByteArray, scalingFactor: Double): Bitmap {
         val src: Bitmap = BitmapFactory.decodeByteArray(data, 0, data.size)
         val m = Matrix()
         val width = src.width
@@ -106,16 +115,18 @@ class MainActivity : AppCompatActivity() {
         produceContainerView.visibility = View.GONE
         val badgeSeasonal = findViewById<TextView>(R.id.badge_seasonal)
         badgeSeasonal.visibility = View.GONE
+        val tree = findViewById<ImageView>(R.id.tree)
+        tree.visibility = View.GONE
         return Pair(produceContainerView, badgeSeasonal)
     }
 
 
     private fun getProduceBackgroundColor(produce: Produce): Int {
-        val isInSeasonOrLocal: Boolean = produce.in_season || produce.country.equals("Schweiz")
+        val isInSeasonAndLocal: Boolean = produce.in_season && produce.country.equals("Schweiz")
         val isNotInSeasonOrEuropean: Boolean =
             !produce.in_season && produce.continent.equals("Europe")
         return when {
-            isInSeasonOrLocal -> Color.parseColor("#43a047")
+            isInSeasonAndLocal -> Color.parseColor("#43a047")
             isNotInSeasonOrEuropean -> Color.parseColor("#ffa000")
             else -> Color.parseColor("#d73a49")
         }
@@ -191,7 +202,6 @@ class MainActivity : AppCompatActivity() {
             override fun run() {
                 runOnUiThread(Runnable {
                     mCamera?.takePicture(null, null, pictureCallback)
-
                 })
 
             }
