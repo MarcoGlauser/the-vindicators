@@ -10,4 +10,5 @@ By pointing the mobile phone on produce it can help you to determine whether it 
 The MVP consists of a serverless Android App. Currently, only one API is used, provided by bite.ai to recognize the produce in the picture. All other information was crawled from swiss websites or online shops of the two big grocery chains.
 The app created within these 36 hours is by no means a perfect prototype but a well-elaborated proof of concept. It shows how technology like a mobile phone app can improve our choices by helping us develop an awareness of our carbon dioxide footprint.
 
-![App Showcase](mobile_app_showcase.jpeg "")
+<img source="mobile_app_showcase.jpeg" width="400" />
+
