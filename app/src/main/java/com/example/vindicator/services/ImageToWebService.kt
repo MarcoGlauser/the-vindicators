@@ -3,19 +3,21 @@ package com.example.vindicator.services
 import android.content.ContentValues.TAG
 import android.util.Log
 import com.jayway.jsonpath.JsonPath
-import okhttp3.*
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
+import okhttp3.Response
+import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.IOException
 import java.util.*
-import java.util.function.Consumer
 
 
 class ImageToWebService {
 
-    fun getInformationForImage(byteImage: ByteArray, lambda: Consumer<String>) {
+    fun getInformationForImage(byteImage: ByteArray, lambda: (String) -> Unit) {
 
         val url = "https://api-beta.bite.ai"
         val token = "afa383c72087a4aea96567d1cb48ddfdcfef1679"
@@ -47,7 +49,10 @@ class ImageToWebService {
 
         requestCall.enqueue(object : Callback<ResponseBody> {
 
-            override fun onResponse(call: Call<ResponseBody>, response: retrofit2.Response<ResponseBody>) {
+            override fun onResponse(
+                call: Call<ResponseBody>,
+                response: retrofit2.Response<ResponseBody>
+            ) {
                 var rawJson: String? = null
                 try {
                     rawJson = response.body()?.string()
@@ -58,7 +63,7 @@ class ImageToWebService {
                 Log.d(TAG, rawJson)
                 val name = JsonPath.read<String>(rawJson, "$.items[0].item.name")
                 Log.d(TAG, name)
-                lambda.accept(name)
+                lambda(name)
 
             }
 
