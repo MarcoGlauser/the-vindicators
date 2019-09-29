@@ -29,6 +29,7 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
+    private var mTakingPictureRightNow: Boolean = false;
     private lateinit var mtimer: Timer
     private var mCamera: Camera? = null
     private var mPreview: CameraPreview? = null
@@ -43,9 +44,9 @@ class MainActivity : AppCompatActivity() {
             val compressedBytes = bytes.toByteArray()
             Log.d(TAG, data.size.toString())
             Log.d(TAG, compressedBytes.size.toString())
-            ImageToWebService.instance.getInformationForImage(compressedBytes) {
-
-                ProduceDataProvider().loadProduce(it).addOnSuccessListener {
+            ImageToWebService.instance.getInformationForImage(compressedBytes) { produceName: String ->
+                mTakingPictureRightNow = false
+                ProduceDataProvider().loadProduce(produceName).addOnSuccessListener {
                     if (it != null) {
 
                         val produce: Produce? = it.toObject(Produce::class.java)
@@ -53,6 +54,7 @@ class MainActivity : AppCompatActivity() {
                             val (produceContainerView, badgeSeasonal) = resetView()
                             mtimer.cancel()
                             mtimer = Timer()
+
                             produceContainerView.visibility = View.VISIBLE
                             produceContainerView.setBackgroundColor(
                                 getProduceBackgroundColor(
@@ -61,7 +63,7 @@ class MainActivity : AppCompatActivity() {
                             )
 
                             val produceNameView = findViewById<TextView>(R.id.produce_name)
-                            produceNameView.text = produce.name_de
+                            produceNameView.text = produceName
 
                             if (produce.in_season) {
                                 badgeSeasonal.visibility = View.VISIBLE
@@ -79,6 +81,29 @@ class MainActivity : AppCompatActivity() {
                                 tree.visibility = View.GONE
                             }
 
+
+                            val infoBtn = findViewById<MaterialButton>(R.id.btn_info)
+
+
+                            infoBtn.setOnClickListener {
+                                val toast = Toast.makeText(
+                                    applicationContext,
+                                    getProduceText(produce),
+                                    Toast.LENGTH_LONG
+                                )
+                                val toastLayout = toast.view as LinearLayout;
+                                val toastTV = toastLayout.getChildAt(0) as TextView;
+                                toastTV.textSize = 20f
+
+                                toast.setGravity(
+                                    Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL,
+                                    0,
+                                    400
+                                )
+
+
+                                toast.show()
+                            }
                         }
                     } else {
                         throw java.lang.RuntimeException("could no deserialize produce ${it?.data}")
@@ -130,8 +155,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun getProduceText(produce: Produce): String {
         return when {
-            produce.country.equals("Schweiz") && produce.in_season -> "This ${produce.name_en } is locally produced and in season!Awesome job, saving the penguins!"
-            produce.country.equals("Schweiz") && !produce.in_season -> "This ${ produce.name_en } is locally produced but not in season. Therefore, a lot of co2 is spent on growing and storing it. You could try ${ produce.alternative } which is in season right now."
+            produce.country.equals("Schweiz") && produce.in_season -> "This ${produce.name_en} is locally produced and in season! Awesome job, saving the penguins!"
+            produce.country.equals("Schweiz") && !produce.in_season -> "This ${produce.name_en} is locally produced but not in season. Therefore, a lot of co2 is spent on growing and storing it. You could try ${produce.alternative} which is in season right now."
             produce.continent.equals("Europe") -> "This ${produce.name_en} is imported from the EU. It's not ideal and we know that you can do better. You could try ${produce.alternative} which is in season right now."
             produce.transport_mode.equals("ship") -> "This ${produce.name_en} is from ${produce.country} which is ${produce.distance}km away! Avoid this if you can!"
             else -> "Your delicious ${produce.name_en} arrives by plane from ${produce.country}, ${produce.distance}km away. Avoid this product at all cost. Don't kill penguin babies!"
@@ -197,36 +222,29 @@ class MainActivity : AppCompatActivity() {
         mtimer = Timer()
         takePicturesInIntervalAndSearchProduce()
 
-        val produceContainerView = findViewById<GridLayout>(R.id.produce_container)
-        produceContainerView.setOnClickListener {
+        val cameraPreview = findViewById<FrameLayout>(R.id.camera_preview)
+        cameraPreview.setOnClickListener {
             takePicturesInIntervalAndSearchProduce()
             resetView()
         }
 
-        val infoBtn = findViewById<MaterialButton>(R.id.btn_info)
-
-
-        infoBtn.setOnClickListener {
-            val toast = Toast.makeText(
-                applicationContext,
-                "This is a message displayed in a Toast",
-                Toast.LENGTH_LONG
-            )
-
-            toast.setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 200)
-            toast.show()
-        }
     }
 
     private fun takePicturesInIntervalAndSearchProduce() {
+        mtimer.cancel()
+        mtimer = Timer()
         mtimer.scheduleAtFixedRate(object : TimerTask() {
             override fun run() {
                 runOnUiThread(Runnable {
-                    mCamera?.takePicture(null, null, pictureCallback)
+                    if (!mTakingPictureRightNow) {
+                        mTakingPictureRightNow = true
+                        mCamera?.takePicture(null, null, pictureCallback)
+                    }
+
                 })
 
             }
-        }, 100, 2000)
+        }, 100, 1500)
     }
 
 
