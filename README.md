@@ -11,6 +11,6 @@ The MVP consists of a serverless Android App. The key strength of this applicati
 # Results:
 The app created within these 36 hours is by no means a perfect prototype but a well-elaborated proof of concept. It shows how technology like a mobile phone app can improve our choices by helping us develop an awareness of our carbon dioxide footprint. The global food & grocery sector reached US$8,045 billion in 2017 and this is only an indicator of the impact that rising carbon dioxide awareness can do in this market. By expanding our app to more products like packaged good or meat an even bigger impact can be achieved! Further, the technology can be integrated into customer loyalty reward systems or even connected to personal health tracking.
 
-![App Showcase](mobile_app_showcase.jpeg """)
+![App Showcase](mobile_app_showcase.jpeg "")
 
 
