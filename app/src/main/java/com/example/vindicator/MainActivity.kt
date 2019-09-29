@@ -9,19 +9,18 @@ import android.graphics.Matrix
 import android.hardware.Camera
 import android.os.Bundle
 import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
-import android.widget.FrameLayout
-import android.widget.GridLayout
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.vindicator.services.ImageToWebService
 import com.example.vindicator.services.Produce
 import com.example.vindicator.services.ProduceDataProvider
+import com.google.android.material.button.MaterialButton
 import java.io.ByteArrayOutputStream
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -67,9 +66,6 @@ class MainActivity : AppCompatActivity() {
                             if (produce.in_season) {
                                 badgeSeasonal.visibility = View.VISIBLE
                             }
-
-//                            val iconOriginView = findViewById<TextView>(R.id.icon_origin)
-//                            iconOriginView.text = getProduceTransportIcon(produce)
 
                             val textViewKm = findViewById<TextView>(R.id.textview_km)
                             textViewKm.text = "${(produce.co2_emissions_per_kg / 400)} km per kg"
@@ -160,6 +156,7 @@ class MainActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_FULLSCREEN,
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
+
         setContentView(R.layout.main_activity)
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -204,6 +201,20 @@ class MainActivity : AppCompatActivity() {
         produceContainerView.setOnClickListener {
             takePicturesInIntervalAndSearchProduce()
             resetView()
+        }
+
+        val infoBtn = findViewById<MaterialButton>(R.id.btn_info)
+
+
+        infoBtn.setOnClickListener {
+            val toast = Toast.makeText(
+                applicationContext,
+                "This is a message displayed in a Toast",
+                Toast.LENGTH_LONG
+            )
+
+            toast.setGravity(Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL, 0, 200)
+            toast.show()
         }
     }
 
