@@ -124,11 +124,21 @@ class MainActivity : AppCompatActivity() {
     private fun getProduceBackgroundColor(produce: Produce): Int {
         val isInSeasonAndLocal: Boolean = produce.in_season && produce.country.equals("Schweiz")
         val isNotInSeasonOrEuropean: Boolean =
-            !produce.in_season && produce.continent.equals("Europe")
+            (produce.country.equals("Schweiz") && !produce.in_season) || produce.continent.equals("Europe")
         return when {
             isInSeasonAndLocal -> Color.parseColor("#43a047")
             isNotInSeasonOrEuropean -> Color.parseColor("#ffa000")
             else -> Color.parseColor("#d73a49")
+        }
+    }
+
+    private fun getProduceText(produce: Produce): String {
+        return when {
+            produce.country.equals("Schweiz") && produce.in_season -> "This ${produce.name_en } is locally produced and in season!Awesome job, saving the penguins!"
+            produce.country.equals("Schweiz") && !produce.in_season -> "This ${ produce.name_en } is locally produced but not in season. Therefore, a lot of co2 is spent on growing and storing it. You could try ${ produce.alternative } which is in season right now."
+            produce.continent.equals("Europe") -> "This ${produce.name_en} is imported from the EU. It's not ideal and we know that you can do better. You could try ${produce.alternative} which is in season right now."
+            produce.transport_mode.equals("ship") -> "This ${produce.name_en} is from ${produce.country} which is ${produce.distance}km away! Avoid this if you can!"
+            else -> "Your delicious ${produce.name_en} arrives by plane from ${produce.country}, ${produce.distance}km away. Avoid this product at all cost. Don't kill penguin babies!"
         }
     }
 

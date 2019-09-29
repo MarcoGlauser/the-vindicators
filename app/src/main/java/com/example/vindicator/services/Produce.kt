@@ -9,4 +9,5 @@ class Produce {
     var transport_mode: String? = null
     var in_season: Boolean = false
     var co2_emissions_per_kg: Int = 0
+    var alternative: String = ""
 }
